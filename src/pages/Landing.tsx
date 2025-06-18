@@ -1,7 +1,6 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useNavigate } from "react-router-dom"
-import { Music } from "lucide-react"
 import { FloatingNav } from "@/components/FloatingNavbar"
 
 const navItems = [
@@ -73,28 +72,16 @@ const Landing = () => {
               </CardContent>
             </Card>
           </div>
-
-          {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
             <Button
+              variant="default"
               size="lg"
               onClick={() => navigate("/auth")}
-              className="w-full sm:w-auto"
-            >
-              Get Started
-            </Button>
-
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={() => navigate("/dashboard")}
               className="w-full sm:w-auto"
             >
               Try Demo
             </Button>
           </div>
-
-          {/* Footer */}
           <div className="pt-8 border-t border-border/50">
             <p className="text-sm text-muted-foreground">
               Experience the future of audio and video processing

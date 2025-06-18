@@ -336,7 +336,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <header className="container mx-auto py-6">
+      <header className="container mx-auto py-3 pt-10">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between">
           <div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-sonic-purple to-sonic-purple-light bg-clip-text text-transparent">
