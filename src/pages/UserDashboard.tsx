@@ -1,69 +1,75 @@
-
-import { useState, useEffect } from "react";
-import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Download, ArrowLeft, History, User } from "lucide-react";
-import { format } from "date-fns";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react"
+import { useAuth } from "@/contexts/AuthContext"
+import { supabase } from "@/integrations/supabase/client"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
+import { Button } from "@/components/ui/button"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Download, ArrowLeft, History, User } from "lucide-react"
+import { format } from "date-fns"
+import { Link } from "react-router-dom"
 
 interface Enhancement {
-  id: string;
-  original_file_name: string;
-  preset_used: string;
-  created_at: string;
-  enhanced_file_path: string;
+  id: string
+  original_file_name: string
+  preset_used: string
+  created_at: string
+  enhanced_file_path: string
 }
 
 const UserDashboard = () => {
-  const { user, signOut } = useAuth();
-  const [enhancements, setEnhancements] = useState<Enhancement[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, signOut } = useAuth()
+  const [enhancements, setEnhancements] = useState<Enhancement[]>([])
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     if (user) {
-      fetchEnhancements();
+      fetchEnhancements()
     }
-  }, [user]);
+  }, [user])
 
   const fetchEnhancements = async () => {
-    setIsLoading(true);
+    setIsLoading(true)
     const { data, error } = await supabase
       .from("audio_enhancements")
       .select("*")
-      .order("created_at", { ascending: false });
+      .order("created_at", { ascending: false })
 
     if (error) {
-      console.error("Error fetching enhancements:", error);
+      console.error("Error fetching enhancements:", error)
     } else {
-      setEnhancements(data || []);
+      setEnhancements(data || [])
     }
-    setIsLoading(false);
-  };
+    setIsLoading(false)
+  }
 
   const downloadEnhancement = async (path: string, fileName: string) => {
     try {
       const { data, error } = await supabase.storage
         .from("audio")
-        .download(path);
-      
-      if (error) throw error;
+        .download(path)
 
-      const url = URL.createObjectURL(data);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = fileName;
-      document.body.appendChild(a);
-      a.click();
-      URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      if (error) throw error
+
+      const url = URL.createObjectURL(data)
+      const a = document.createElement("a")
+      a.href = url
+      a.download = fileName
+      document.body.appendChild(a)
+      a.click()
+      URL.revokeObjectURL(url)
+      document.body.removeChild(a)
     } catch (error) {
-      console.error("Error downloading file:", error);
+      console.error("Error downloading file:", error)
     }
-  };
+  }
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
@@ -76,10 +82,10 @@ const UserDashboard = () => {
             <p className="text-sm text-muted-foreground">User Dashboard</p>
           </div>
           <div className="flex items-center gap-2">
-            <Link to="/">
+            <Link to="/app">
               <Button variant="outline" size="sm">
-                <ArrowLeft className="mr-2 h-4 w-4" /> 
-                Back to Studio
+                <ArrowLeft className="h-4 w-4" />
+                Back
               </Button>
             </Link>
             <Button onClick={signOut} variant="destructive" size="sm">
@@ -113,7 +119,7 @@ const UserDashboard = () => {
                 ) : enhancements.length === 0 ? (
                   <div className="py-8 text-center text-muted-foreground">
                     <p>You haven't enhanced any audio files yet.</p>
-                    <Link to="/" className="mt-4 inline-block">
+                    <Link to="/legacy" className="mt-4 inline-block">
                       <Button>Go to Studio</Button>
                     </Link>
                   </div>
@@ -134,22 +140,25 @@ const UserDashboard = () => {
                             <TableCell className="font-medium">
                               {enhancement.original_file_name}
                             </TableCell>
+                            <TableCell>{enhancement.preset_used}</TableCell>
                             <TableCell>
-                              {enhancement.preset_used}
-                            </TableCell>
-                            <TableCell>
-                              {format(new Date(enhancement.created_at), "MMM d, yyyy")}
+                              {format(
+                                new Date(enhancement.created_at),
+                                "MMM d, yyyy"
+                              )}
                             </TableCell>
                             <TableCell className="text-right">
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={() => downloadEnhancement(
-                                  enhancement.enhanced_file_path,
-                                  `enhanced_${enhancement.original_file_name}`
-                                )}
+                                onClick={() =>
+                                  downloadEnhancement(
+                                    enhancement.enhanced_file_path,
+                                    `enhanced_${enhancement.original_file_name}`
+                                  )
+                                }
                               >
-                                <Download className="h-4 w-4 mr-1" /> 
+                                <Download className="h-4 w-4 mr-1" />
                                 Download
                               </Button>
                             </TableCell>
@@ -170,9 +179,18 @@ const UserDashboard = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <p><strong>Email:</strong> {user?.email}</p>
-                  <p><strong>User ID:</strong> {user?.id}</p>
-                  <p><strong>Account Created:</strong> {user?.created_at ? format(new Date(user.created_at), "MMM d, yyyy") : "Unknown"}</p>
+                  <p>
+                    <strong>Email:</strong> {user?.email}
+                  </p>
+                  <p>
+                    <strong>User ID:</strong> {user?.id}
+                  </p>
+                  <p>
+                    <strong>Account Created:</strong>{" "}
+                    {user?.created_at
+                      ? format(new Date(user.created_at), "MMM d, yyyy")
+                      : "Unknown"}
+                  </p>
                 </div>
               </CardContent>
             </Card>
@@ -186,7 +204,7 @@ const UserDashboard = () => {
         </div>
       </footer>
     </div>
-  );
-};
+  )
+}
 
-export default UserDashboard;
+export default UserDashboard

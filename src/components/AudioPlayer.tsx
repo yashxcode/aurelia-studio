@@ -148,7 +148,7 @@ const AudioPlayer = React.forwardRef<unknown, AudioPlayerProps>(
 
       frameId = requestAnimationFrame(tick);
       return () => cancelAnimationFrame(frameId);
-      // eslint-disable-next-line
+       
     }, [isPlaying, onTimeUpdate, onPlayStateChange, stopPlayback]);
 
     // Start playback from a position
