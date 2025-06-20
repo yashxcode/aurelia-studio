@@ -21,6 +21,7 @@ import UserPanel from "@/components/UserPanel"
 import { supabase } from "@/integrations/supabase/client"
 import { useAuth } from "@/contexts/AuthContext"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import TranscriptViewer from "@/components/TranscriptViewer"
 
 const Index = () => {
   const { toast } = useToast()
@@ -46,6 +47,11 @@ const Index = () => {
   })
   const [isSaving, setIsSaving] = useState(false)
   const [activeTab, setActiveTab] = useState<string>("presets")
+  const [transcript, setTranscript] = useState("")
+  const [isTranscribing, setIsTranscribing] = useState(false)
+  const [transcriptionError, setTranscriptionError] = useState<string | null>(
+    null
+  )
 
   // Removed ref for AudioPlayer, as it is not needed and causes warning
   // const playerRef = useRef<{ togglePlayPause: () => void; handleRestart: () => void } | null>(null);
@@ -334,6 +340,37 @@ const Index = () => {
     ]
   )
 
+  const handleTranscribe = async () => {
+    if (!originalFile) return
+    setIsTranscribing(true)
+    setTranscriptionError(null)
+    setTranscript("")
+    try {
+      const formData = new FormData()
+      formData.append("file", originalFile)
+      const res = await fetch("/api/transcribe", {
+        method: "POST",
+        body: formData,
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error || "Transcription failed")
+      }
+      const data = await res.json()
+      setTranscript(data.transcript || "")
+    } catch (err: any) {
+      setTranscriptionError(err.message || "Failed to transcribe audio/video.")
+    } finally {
+      setIsTranscribing(false)
+    }
+  }
+
+  const handleCopyTranscript = () => {
+    if (!transcript) return
+    navigator.clipboard.writeText(transcript)
+    toast({ title: "Transcript copied!" })
+  }
+
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
       <header className="container mx-auto py-3 pt-10">
@@ -517,6 +554,18 @@ const Index = () => {
               </CardContent>
             </Card>
 
+            <TranscriptViewer
+              transcript={transcript}
+              isLoading={isTranscribing}
+              onCopy={handleCopyTranscript}
+              onGenerate={handleTranscribe}
+            />
+            {transcriptionError && (
+              <div className="text-sm text-destructive mt-2">
+                {transcriptionError}
+              </div>
+            )}
+
             <Card>
               <CardContent className="p-6 space-y-4">
                 <h3 className="text-lg font-semibold">About Aurelia Studio</h3>
@@ -565,6 +614,12 @@ const Index = () => {
         onRestart={() => setCurrentTime(0)}
         onDownload={() => handleDownload("wav")}
       />
+
+      {(isProcessing || isTranscribing || isSaving) && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+          <Loader2 className="h-12 w-12 animate-spin text-white" />
+        </div>
+      )}
     </div>
   )
 }

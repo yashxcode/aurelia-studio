@@ -1,0 +1,11 @@
+{
+  "buildCommand": "bun run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "functions": {
+    "api/transcribe.py": {
+      "runtime": "python3.9",
+      "maxDuration": 60
+    }
+  }
+}
